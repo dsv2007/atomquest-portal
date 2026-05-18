@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role
+  managerId  String?
+  createdAt  DateTime @default(now())
+
+  goals      Goal[]
+}
+
+model Goal {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  thrustArea    String
+  uomType       String
+  target        Float
+  weightage     Float
+  status        String
+  locked        Boolean @default(false)
+
+  userId        String
+  user          User @relation(fields: [userId], references: [id])
+
+  checkIns      CheckIn[]
+
+  createdAt     DateTime @default(now())
+}
+model CheckIn {
+  id          String   @id @default(cuid())
+  achievement Float
+  status      String
+  comment     String?
+
+  goalId      String
+  goal        Goal @relation(fields: [goalId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  performedBy String
+  goalTitle   String
+  timestamp   DateTime @default(now())
+}
